@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using CityInfo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace CityInfo.Controllers 
 {
@@ -114,6 +115,47 @@ namespace CityInfo.Controllers
 
             pontoTuristicoArmazenado.Nome = pontoTuristico.Nome;
             pontoTuristicoArmazenado.Descricao = pontoTuristico.Descricao;
+
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:int}")]
+        public IActionResult AtualizarPontoTuristicoParcial(int idCidade, int id, [FromBody]JsonPatchDocument<PontoTuristicoParaUpdateDTO> jsonPatchDocument)
+        {
+            if(jsonPatchDocument == null)
+            {
+                return BadRequest("Documento de operações ausente ou invalido");
+            }        
+                                
+            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
+
+            if(cidade == null) 
+            {
+                return NotFound($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
+            }       
+
+            var pontoTuristicoArmazenado = cidade.PontosTuristicos.FirstOrDefault(p => p.Id == id);
+
+            if(pontoTuristicoArmazenado == null)
+            {
+                return NotFound($"Ponto turístico com o id {id} não foi encontrado para a cidade {idCidade}");
+            }
+    
+            var pontoTuristicoParaPatch = new PontoTuristicoParaUpdateDTO(){
+                Nome = pontoTuristicoArmazenado.Nome,
+                Descricao = pontoTuristicoArmazenado.Descricao        
+            };
+
+            jsonPatchDocument.ApplyTo(pontoTuristicoParaPatch, ModelState);
+
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            pontoTuristicoArmazenado.Nome = pontoTuristicoParaPatch.Nome;
+            pontoTuristicoArmazenado.Descricao = pontoTuristicoParaPatch.Descricao;
 
 
             return NoContent();
