@@ -121,33 +121,40 @@ namespace CityInfo.Controllers
         }
 
         [HttpPatch("{id:int}")]
-        public IActionResult AtualizarPontoTuristicoParcial(int idCidade, int id, [FromBody]JsonPatchDocument<PontoTuristicoParaUpdateDTO> jsonPatchDocument)
+        public IActionResult AtualizarPontoTuristicoParcialmente(int idCidade, int id, [FromBody]JsonPatchDocument<PontoTuristicoParaUpdateDTO> patchDocument)
         {
-            if(jsonPatchDocument == null)
-            {
-                return BadRequest("Documento de operações ausente ou invalido");
-            }        
-                                
+            if(patchDocument == null){
+                return BadRequest("patchDocument invalido");
+            }
+
             var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
 
-            if(cidade == null) 
+            if(cidade == null)
             {
-                return NotFound($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
-            }       
-
+                return NotFound("Cidade não encontrada, verificar o ID");
+            }
+            
             var pontoTuristicoArmazenado = cidade.PontosTuristicos.FirstOrDefault(p => p.Id == id);
 
-            if(pontoTuristicoArmazenado == null)
+            if(pontoTuristicoArmazenado == null) 
             {
-                return NotFound($"Ponto turístico com o id {id} não foi encontrado para a cidade {idCidade}");
+                return NotFound();
             }
-    
+
             var pontoTuristicoParaPatch = new PontoTuristicoParaUpdateDTO(){
                 Nome = pontoTuristicoArmazenado.Nome,
-                Descricao = pontoTuristicoArmazenado.Descricao        
+                Descricao = pontoTuristicoArmazenado.Descricao
             };
 
-            jsonPatchDocument.ApplyTo(pontoTuristicoParaPatch, ModelState);
+            if(pontoTuristicoParaPatch.Nome == pontoTuristicoParaPatch.Descricao)
+            {
+                ModelState.AddModelError("Nome", "Nome e Descrição não podem ser iguais");
+            }
+
+            TryValidateModel(pontoTuristicoParaPatch);
+
+
+            patchDocument.ApplyTo(pontoTuristicoParaPatch, ModelState);
 
             if(!ModelState.IsValid)
             {
@@ -157,6 +164,29 @@ namespace CityInfo.Controllers
             pontoTuristicoArmazenado.Nome = pontoTuristicoParaPatch.Nome;
             pontoTuristicoArmazenado.Descricao = pontoTuristicoParaPatch.Descricao;
 
+            return NoContent();
+
+        }
+
+        [HttpDelete("{id:int}")]
+        public IActionResult ExcluirPontoTuristicoPorId(int idCidade, int id)
+        {
+
+            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
+
+            if(cidade == null)
+            {
+                return NotFound("Cidade não encontrada, verificar o ID");
+            }
+            
+            var pontoTuristicoArmazenado = cidade.PontosTuristicos.FirstOrDefault(p => p.Id == id);
+
+            if(pontoTuristicoArmazenado == null) 
+            {
+                return NotFound();
+            }
+
+            cidade.PontosTuristicos.Remove(pontoTuristicoArmazenado);
 
             return NoContent();
         }
