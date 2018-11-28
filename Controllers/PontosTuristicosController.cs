@@ -1,27 +1,44 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using CityInfo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
+using CityInfo.Models;
+using Microsoft.Extensions.Logging;
 
 namespace CityInfo.Controllers 
 {
     [Route("api/cidades/{idCidade}/pontosturisticos")]
     public class PontosTuristicosController : ControllerBase 
     {
-        [HttpGet()]
+
+        private ILogger<PontosTuristicosController> _logger;
+
+        public PontosTuristicosController(ILogger<PontosTuristicosController> logger)
+        {
+            _logger = logger;
+        }
+
+        [HttpGet()]    
         public IActionResult GetPontosTuristicosDaCidade(int idCidade)
         {
+            try{
             var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
 
-            if(cidade == null) {
-                return NotFound($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
+            if (cidade == null)
+            {
+                _logger.LogInformation($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
+                return NotFound();
             }
 
             var pontosTuristicos = cidade.PontosTuristicos;
-            
+
             return Ok(pontosTuristicos);
+
+            } catch (Exception ex){
+                _logger.LogCritical($" *** Exceção ao tentar obter pontos turísticos para a cidade {idCidade} ***",ex);            
+                return StatusCode(500, "Um Problema ocorreu ao tentar processar sua requisição.");
+            }
         }
 
         [HttpGet("{id:int}", Name = "ObterPontoTuristico")]

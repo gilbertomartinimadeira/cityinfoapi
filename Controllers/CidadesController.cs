@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using CityInfo.Models;
+//using CityInfo.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CityInfo.Controllers 
