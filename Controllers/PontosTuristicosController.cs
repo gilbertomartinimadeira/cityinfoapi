@@ -5,25 +5,28 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
 using CityInfo.Models;
 using Microsoft.Extensions.Logging;
+using CityInfo.Services;
 
 namespace CityInfo.Controllers 
 {
     [Route("api/cidades/{idCidade}/pontosturisticos")]
     public class PontosTuristicosController : ControllerBase 
     {
-
+        
         private ILogger<PontosTuristicosController> _logger;
+        private IMailService _mailService;
 
-        public PontosTuristicosController(ILogger<PontosTuristicosController> logger)
+        public PontosTuristicosController(ILogger<PontosTuristicosController> logger, IMailService mailService)
         {
             _logger = logger;
+            _mailService = mailService;
         }
 
         [HttpGet()]    
         public IActionResult GetPontosTuristicosDaCidade(int idCidade)
         {
             try{
-            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
+            var cidade = CidadesDataStore.Cidades.First(c => c.Id == idCidade);
 
             if (cidade == null)
             {
@@ -205,7 +208,10 @@ namespace CityInfo.Controllers
 
             cidade.PontosTuristicos.Remove(pontoTuristicoArmazenado);
 
+            _mailService.Enviar($"Ponto turístico removido", $@"O Ponto turístico  {pontoTuristicoArmazenado.Nome} 
+                                                                com Id {pontoTuristicoArmazenado.Id} foi excluído da base.");
+            
             return NoContent();
         }
     }
-}
+} 

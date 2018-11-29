@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CityInfo.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -32,6 +33,8 @@ namespace CityInfo
                     .AddMvcOptions(options => {
                         options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
                     });
+
+            services.AddTransient<IMailService,LocalMailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,7 +42,7 @@ namespace CityInfo
         {
 
             loggerFactory.AddNLog();
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
