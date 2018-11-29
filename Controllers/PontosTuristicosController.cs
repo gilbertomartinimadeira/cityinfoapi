@@ -26,17 +26,19 @@ namespace CityInfo.Controllers
         public IActionResult GetPontosTuristicosDaCidade(int idCidade)
         {
             try{
-            var cidade = CidadesDataStore.Cidades.First(c => c.Id == idCidade);
+                var cidade = CidadesDataStore.Cidades.First(c => c.Id == idCidade);
 
-            if (cidade == null)
-            {
-                _logger.LogInformation($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
-                return NotFound();
-            }
+                if (cidade == null)
+                {
+                    _logger.LogInformation($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
+                    return NotFound();
+                }
 
-            var pontosTuristicos = cidade.PontosTuristicos;
+                var pontosTuristicos = cidade.PontosTuristicos;
 
-            return Ok(pontosTuristicos);
+
+                return Ok(pontosTuristicos);
+
 
             } catch (Exception ex){
                 _logger.LogCritical($" *** Exceção ao tentar obter pontos turísticos para a cidade {idCidade} ***",ex);            
@@ -44,8 +46,7 @@ namespace CityInfo.Controllers
             }
         }
 
-        [HttpGet("{id:int}", Name = "ObterPontoTuristico")]
-        
+        [HttpGet("{id:int}", Name = "ObterPontoTuristico")]    
         public IActionResult GetPontoTuristicoDaCidadePorId(int idCidade, int id)
         {
             var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);

@@ -19,8 +19,8 @@ namespace CityInfo
     public class Startup
     {
         public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
+        {        
+            Configuration = configuration;        
         }
 
         public IConfiguration Configuration { get; }
@@ -35,6 +35,10 @@ namespace CityInfo
                     });
 
             services.AddTransient<IMailService,LocalMailService>();
+
+            services.AddSingleton(Configuration);
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
