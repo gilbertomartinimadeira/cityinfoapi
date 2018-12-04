@@ -39,11 +39,14 @@ namespace CityInfo
             services.AddTransient<IMailService,LocalMailService>();
 
             services.AddSingleton(Configuration);
-            var SqliteConnectionString = Configuration.GetConnectionString("SqliteConnection");
+
+            var SqliteConnectionString = Configuration["SQLITECONNECTION"];
 
             services.AddDbContext<CityInfoContext>(options => {            
                 options.UseSqlite( SqliteConnectionString);
             });
+
+            services.AddScoped<ICidadeRepository, CidadeRepository>();
 
         }
 
