@@ -3,14 +3,24 @@ using System.Linq;
 using System.Collections.Generic;
 //using CityInfo.Models;
 using Microsoft.AspNetCore.Mvc;
+using CityInfo.Entities;
+using CityInfo.Services;
 
 namespace CityInfo.Controllers 
 {
     [Route("api/cidades")]
     public class CidadesController : ControllerBase 
     {
+        private ICidadeRepository _repositorio;
+
+        public CidadesController(ICidadeRepository repositorio )
+        {                
+            _repositorio = repositorio;
+        }
+
         public IActionResult GetCidades()
         {
+        
             return Ok(CidadesDataStore.Cidades);
         }
 

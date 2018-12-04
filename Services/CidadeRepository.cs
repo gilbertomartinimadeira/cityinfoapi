@@ -11,6 +11,11 @@ namespace CityInfo.Services
         public CidadeRepository(CityInfoContext context)
         {
             _context = context;
+            
+            if(!_context.Cidades.Any())
+            {
+                _context.PreencherDadosIniciais();
+            }
         }
 
 
