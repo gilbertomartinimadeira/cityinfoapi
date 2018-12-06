@@ -21,8 +21,11 @@ namespace CityInfo.Controllers
         public IActionResult GetCidades()
         {
         
-            return Ok(CidadesDataStore.Cidades);
+            var cidades = _repositorio.ObterCidades();
+
+            return Ok(cidades);
         }
+        
 
         [HttpGet("{id:int}")]
         public IActionResult GetCidadePorId(int id)
