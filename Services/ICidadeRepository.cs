@@ -6,14 +6,15 @@ namespace CityInfo.Services
 {
     public interface ICidadeRepository
     {
+        bool CidadeExiste(int idCidade);
         IQueryable<Cidade> ObterCidades();    
 
         Cidade ObterCidade(int id, bool incluiPontosTuristicos);
 
-        IQueryable<PontoTuristico> ObterPontosTuristicosDaCidade(int idCidade);
+        IEnumerable<PontoTuristico> ObterPontosTuristicosDaCidade(int idCidade);
 
         PontoTuristico ObterPontoTuristicoDaCidade(int idCidade, int id);
-
+        
 
     }
 }

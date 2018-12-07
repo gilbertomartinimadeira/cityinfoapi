@@ -15,29 +15,41 @@ namespace CityInfo.Controllers
         
         private ILogger<PontosTuristicosController> _logger;
         private IMailService _mailService;
+        private ICidadeRepository _repository;
 
-        public PontosTuristicosController(ILogger<PontosTuristicosController> logger, IMailService mailService)
+        public PontosTuristicosController(ILogger<PontosTuristicosController> logger, IMailService mailService, ICidadeRepository repository)
         {
             _logger = logger;
             _mailService = mailService;
+            _repository = repository;
         }
 
         [HttpGet()]    
         public IActionResult GetPontosTuristicosDaCidade(int idCidade)
         {
             try{
-                var cidade = CidadesDataStore.Cidades.First(c => c.Id == idCidade);
-
-                if (cidade == null)
+                if(!_repository.CidadeExiste(idCidade))
                 {
                     _logger.LogInformation($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
                     return NotFound();
+                }    
+            
+
+                var pontosTuristicos = _repository.ObterPontosTuristicosDaCidade(idCidade);
+
+                var pontosTuristicosDTO = new List<PontoTuristicoDTO>();
+
+                foreach(var p in pontosTuristicos)
+                {
+                    pontosTuristicosDTO.Add(new PontoTuristicoDTO(){
+                        Id = p.Id,
+                        Nome = p.Nome,
+                        Descricao = p.Descricao
+                    });
                 }
 
-                var pontosTuristicos = cidade.PontosTuristicos;
 
-
-                return Ok(pontosTuristicos);
+                return Ok(pontosTuristicosDTO);
 
 
             } catch (Exception ex){
@@ -49,15 +61,30 @@ namespace CityInfo.Controllers
         [HttpGet("{id:int}", Name = "ObterPontoTuristico")]    
         public IActionResult GetPontoTuristicoDaCidadePorId(int idCidade, int id)
         {
-            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
+           
 
-            if(cidade == null) {
-                return NotFound($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
+            if(!_repository.CidadeExiste(idCidade))
+            {
+                return NotFound();
             }
 
-            var pontoTuristico = cidade.PontosTuristicos.FirstOrDefault(p => p.Id == id);
+            var pontoTuristico = _repository.ObterPontoTuristicoDaCidade(idCidade,id);
 
-            return Ok(pontoTuristico);
+            if(pontoTuristico == null)
+            {
+                return NotFound();
+            }
+
+
+            var pontoTuristicoDTO = new PontoTuristicoDTO(){
+                Id = pontoTuristico.Id,
+                Nome = pontoTuristico.Nome,
+                Descricao = pontoTuristico.Descricao
+            };
+
+            return Ok(pontoTuristicoDTO);
+
+
         }
 
         [HttpPost]

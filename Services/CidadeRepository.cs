@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using CityInfo.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -38,11 +39,12 @@ namespace CityInfo.Services
         }
 
 
-        public IQueryable<PontoTuristico> ObterPontosTuristicosDaCidade(int idCidade)
+        public IEnumerable<PontoTuristico> ObterPontosTuristicosDaCidade(int idCidade)
         {
-            var cidade = _context.Cidades.SingleOrDefault(c => c.Id == idCidade);
+            var cidade = _context.Cidades.Include(c => c.PontosTuristicos)
+                                         .SingleOrDefault(c => c.Id == idCidade);
 
-            return cidade.PontosTuristicos.AsQueryable();
+            return cidade.PontosTuristicos;
 
         }
 
@@ -51,6 +53,11 @@ namespace CityInfo.Services
             return _context.PontosTuristicos
                            .Where(p => p.Id == id && p.CidadeId == idCidade)
                            .FirstOrDefault();
+        }
+
+        public bool CidadeExiste(int idCidade)
+        {
+            return _context.Cidades.Any(c => c.Id == idCidade);
         }
     }
 }
