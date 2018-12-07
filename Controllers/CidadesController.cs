@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using CityInfo.Entities;
 using CityInfo.Services;
+using CityInfo.Models;
 
 namespace CityInfo.Controllers 
 {
@@ -22,20 +23,63 @@ namespace CityInfo.Controllers
         {
         
             var cidades = _repositorio.ObterCidades();
+            List<CidadeSemPontosturisticosDTO> cidadesDTO = new List<CidadeSemPontosturisticosDTO>();
 
-            return Ok(cidades);
+
+            foreach(var c in cidades)
+            {
+                cidadesDTO.Add(new CidadeSemPontosturisticosDTO{
+                    Id = c.Id,
+                    Nome = c.Nome, 
+                    Descricao = c.Descricao,            
+                });
+            }
+
+            return Ok(cidadesDTO);
         }
-        
+
 
         [HttpGet("{id:int}")]
-        public IActionResult GetCidadePorId(int id)
-        {
-            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == id);
+        public IActionResult GetCidadePorId(int id, bool incluiPontosTuristicos = false)
+        {        
+            var cidade = _repositorio.ObterCidade(id,incluiPontosTuristicos);
 
             if(cidade == null) {
                 return NotFound($"Nenhuma Cidade Com id {id} foi encontrada na base");
             }
-            return Ok(cidade);
+
+            if(incluiPontosTuristicos) {                        
+
+                var cidadeDTO = new CidadeDTO(){
+                    Id = cidade.Id,
+                    Nome = cidade.Nome,
+                    Descricao = cidade.Descricao                
+                };
+
+                List<PontoTuristicoDTO> pontosTuristicosDTO = new List<PontoTuristicoDTO>();
+
+                foreach(var p in cidade.PontosTuristicos)
+                {
+                    pontosTuristicosDTO.Add(new PontoTuristicoDTO(){
+                        Id = p.Id,
+                        Nome = p.Nome,
+                        Descricao = p.Descricao                    
+                    });
+                }
+
+                cidadeDTO.PontosTuristicos = pontosTuristicosDTO;
+
+                return Ok(cidadeDTO);
+
+            } else {
+                 var cidadeSemPontoTuristicoDTO = new CidadeSemPontosturisticosDTO(){
+                    Id = cidade.Id,
+                    Nome = cidade.Nome,
+                    Descricao = cidade.Descricao                
+                };
+
+                return Ok(cidadeSemPontoTuristicoDTO);
+            }        
         }
     }
 }
