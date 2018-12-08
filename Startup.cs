@@ -73,7 +73,9 @@ namespace CityInfo
             AutoMapper.Mapper.Initialize(mappingConfig => {
 
                 mappingConfig.CreateMap<Cidade, CidadeSemPontosturisticosDTO>();
-                
+                mappingConfig.CreateMap<Cidade, CidadeDTO>();
+                mappingConfig.CreateMap<PontoTuristico, PontoTuristicoDTO>();
+
             });
 
 

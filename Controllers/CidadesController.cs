@@ -42,35 +42,13 @@ namespace CityInfo.Controllers
 
             if(incluiPontosTuristicos) {                        
 
-                var cidadeDTO = new CidadeDTO(){
-                    Id = cidade.Id,
-                    Nome = cidade.Nome,
-                    Descricao = cidade.Descricao                
-                };
-
-                List<PontoTuristicoDTO> pontosTuristicosDTO = new List<PontoTuristicoDTO>();
-
-                foreach(var p in cidade.PontosTuristicos)
-                {
-                    pontosTuristicosDTO.Add(new PontoTuristicoDTO(){
-                        Id = p.Id,
-                        Nome = p.Nome,
-                        Descricao = p.Descricao                    
-                    });
-                }
-
-                cidadeDTO.PontosTuristicos = pontosTuristicosDTO;
-
+                var cidadeDTO = AutoMapper.Mapper.Map<CidadeDTO>(cidade);                        
                 return Ok(cidadeDTO);
 
             } else {
-                 var cidadeSemPontoTuristicoDTO = new CidadeSemPontosturisticosDTO(){
-                    Id = cidade.Id,
-                    Nome = cidade.Nome,
-                    Descricao = cidade.Descricao                
-                };
 
-                return Ok(cidadeSemPontoTuristicoDTO);
+                var cidadeSemPontosturisticosDTO = AutoMapper.Mapper.Map<CidadeSemPontosturisticosDTO>(cidade);                            
+                return Ok(cidadeSemPontosturisticosDTO);
             }        
         }
     }
