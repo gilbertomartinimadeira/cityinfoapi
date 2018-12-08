@@ -23,17 +23,9 @@ namespace CityInfo.Controllers
         {
         
             var cidades = _repositorio.ObterCidades();
-            List<CidadeSemPontosturisticosDTO> cidadesDTO = new List<CidadeSemPontosturisticosDTO>();
 
+            var cidadesDTO = AutoMapper.Mapper.Map<List<CidadeSemPontosturisticosDTO>>(cidades);
 
-            foreach(var c in cidades)
-            {
-                cidadesDTO.Add(new CidadeSemPontosturisticosDTO{
-                    Id = c.Id,
-                    Nome = c.Nome, 
-                    Descricao = c.Descricao,            
-                });
-            }
 
             return Ok(cidadesDTO);
         }

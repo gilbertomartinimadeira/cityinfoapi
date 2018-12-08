@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NLog.Extensions.Logging;
+using AutoMapper;
+using CityInfo.Models;
 
 namespace CityInfo
 {
@@ -48,6 +50,9 @@ namespace CityInfo
 
             services.AddScoped<ICidadeRepository, CidadeRepository>();
 
+
+            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +69,12 @@ namespace CityInfo
             {
                 app.UseHsts();
             }
+
+            AutoMapper.Mapper.Initialize(mappingConfig => {
+
+                mappingConfig.CreateMap<Cidade, CidadeSemPontosturisticosDTO>();
+                
+            });
 
 
             app.UseHttpsRedirection();

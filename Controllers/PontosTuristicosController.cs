@@ -48,7 +48,6 @@ namespace CityInfo.Controllers
                     });
                 }
 
-
                 return Ok(pontosTuristicosDTO);
 
 
