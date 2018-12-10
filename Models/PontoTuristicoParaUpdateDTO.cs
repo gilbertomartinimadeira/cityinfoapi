@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CityInfo.Controllers
+namespace CityInfo.Models
 {
     public class PontoTuristicoParaUpdateDTO
     {

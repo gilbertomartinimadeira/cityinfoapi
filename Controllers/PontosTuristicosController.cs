@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using CityInfo.Models;
 using Microsoft.Extensions.Logging;
 using CityInfo.Services;
+using CityInfo.Entities;
 
 namespace CityInfo.Controllers 
 {
@@ -32,21 +33,11 @@ namespace CityInfo.Controllers
                 {
                     _logger.LogInformation($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
                     return NotFound();
-                }    
-            
+                }            
 
                 var pontosTuristicos = _repository.ObterPontosTuristicosDaCidade(idCidade);
-
-                var pontosTuristicosDTO = new List<PontoTuristicoDTO>();
-
-                foreach(var p in pontosTuristicos)
-                {
-                    pontosTuristicosDTO.Add(new PontoTuristicoDTO(){
-                        Id = p.Id,
-                        Nome = p.Nome,
-                        Descricao = p.Descricao
-                    });
-                }
+                var pontosTuristicosDTO = AutoMapper.Mapper.Map<List<PontoTuristicoDTO>>(pontosTuristicos);
+            
 
                 return Ok(pontosTuristicosDTO);
 
@@ -74,12 +65,7 @@ namespace CityInfo.Controllers
                 return NotFound();
             }
 
-
-            var pontoTuristicoDTO = new PontoTuristicoDTO(){
-                Id = pontoTuristico.Id,
-                Nome = pontoTuristico.Nome,
-                Descricao = pontoTuristico.Descricao
-            };
+            var pontoTuristicoDTO = AutoMapper.Mapper.Map<PontoTuristicoDTO>(pontoTuristico);
 
             return Ok(pontoTuristicoDTO);
 
@@ -94,42 +80,36 @@ namespace CityInfo.Controllers
                 return BadRequest("Objeto para criação inválido");
             }
 
-            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
-
-            if(cidade == null) {
+            if(!_repository.CidadeExiste(idCidade))
+            {
                 return NotFound($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
             }
 
-            // if(pontoTuristico.Nome == null) 
-            // {
-            //     ModelState.AddModelError("Nome","O Nome do ponto turístico não foi encontrado");
-            // }
+            var cidade = _repository.ObterCidade(idCidade, false);
 
-            // if(pontoTuristico.Descricao == null) 
-            // {
-            //     ModelState.AddModelError("Descricao","A Descrição do ponto turístico não foi encontrada");
-            // }
+
 
             if(!ModelState.IsValid) 
             {
                 return BadRequest(ModelState);
             }
+            
+
+            var novoPontoTuristico = AutoMapper.Mapper.Map<PontoTuristico>(pontoTuristico);
+
+            _repository.AdicionaPontoTuristicoNaCidade(idCidade,novoPontoTuristico);        
 
             
-            var pontosTuristicos = CidadesDataStore.Cidades.SelectMany(c => c.PontosTuristicos);
 
-            var idMaxParaPontoTuristico = pontosTuristicos.Max(p => p.Id);       
+            if(!_repository.Salvar())
+            {
+                return StatusCode(500,"Não foi possível persistir o ponto turístico");
+            }
+
+            var pontoTuristicoCriadoDTO = AutoMapper.Mapper.Map<PontoTuristicoDTO>(novoPontoTuristico);
 
 
-            var novoPontoTuristico = new PontoTuristicoDTO() {
-                Id = ++idMaxParaPontoTuristico,
-                Nome = pontoTuristico.Nome,
-                Descricao = pontoTuristico.Descricao    
-            };
-            
-            cidade.PontosTuristicos.Add(novoPontoTuristico);
-
-            return CreatedAtRoute("ObterPontoTuristico",new {idCidade = idCidade,id = novoPontoTuristico.Id }, novoPontoTuristico);
+            return CreatedAtRoute("ObterPontoTuristico",new {idCidade = idCidade,id = pontoTuristicoCriadoDTO.Id }, pontoTuristicoCriadoDTO);
         }
 
         [HttpPut("{id:int}")]
@@ -146,23 +126,24 @@ namespace CityInfo.Controllers
                 return BadRequest(ModelState);
             }
 
-            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
-
-            if(cidade == null) 
+            if(!_repository.CidadeExiste(idCidade))
             {
-                return NotFound($"Nenhuma Cidade Com id {idCidade} foi encontrada na base");
-            }       
-
-            var pontoTuristicoArmazenado = cidade.PontosTuristicos.FirstOrDefault(p => p.Id == id);
+                return NotFound();
+            }
+            
+            var pontoTuristicoArmazenado = _repository.ObterPontoTuristicoDaCidade(idCidade,id);
 
             if(pontoTuristicoArmazenado == null)
             {
                 return NotFound($"Ponto turístico com o id {id} não foi encontrado para a cidade {idCidade}");
             }
 
-            pontoTuristicoArmazenado.Nome = pontoTuristico.Nome;
-            pontoTuristicoArmazenado.Descricao = pontoTuristico.Descricao;
+            AutoMapper.Mapper.Map(pontoTuristico, pontoTuristicoArmazenado);        
 
+            if(!_repository.Salvar())
+            {
+                return StatusCode(500,"Não foi possível persistir o ponto turístico");
+            }
 
             return NoContent();
         }

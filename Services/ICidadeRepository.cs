@@ -14,6 +14,10 @@ namespace CityInfo.Services
         IEnumerable<PontoTuristico> ObterPontosTuristicosDaCidade(int idCidade);
 
         PontoTuristico ObterPontoTuristicoDaCidade(int idCidade, int id);
+
+        void AdicionaPontoTuristicoNaCidade(int idCidade, PontoTuristico pontoTuristico);
+
+        bool Salvar();
         
 
     }

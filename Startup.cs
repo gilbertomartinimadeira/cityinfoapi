@@ -75,6 +75,10 @@ namespace CityInfo
                 mappingConfig.CreateMap<Cidade, CidadeSemPontosturisticosDTO>();
                 mappingConfig.CreateMap<Cidade, CidadeDTO>();
                 mappingConfig.CreateMap<PontoTuristico, PontoTuristicoDTO>();
+                mappingConfig.CreateMap<PontoTuristicoDTO, PontoTuristico>();
+                mappingConfig.CreateMap<PontoTuristicoParaUpdateDTO, PontoTuristico>();
+                mappingConfig.CreateMap<PontoTuristicoNovoDTO, PontoTuristico>();
+
 
             });
 

@@ -54,10 +54,26 @@ namespace CityInfo.Services
                            .Where(p => p.Id == id && p.CidadeId == idCidade)
                            .FirstOrDefault();
         }
+        
+        public void AdicionaPontoTuristicoNaCidade(int idCidade, PontoTuristico pontoTuristico)
+        {
+            var cidade = ObterCidade(idCidade, false);
+            cidade.PontosTuristicos.Add(pontoTuristico);
+            
+
+        }
+        
 
         public bool CidadeExiste(int idCidade)
         {
             return _context.Cidades.Any(c => c.Id == idCidade);
         }
+
+        public bool Salvar()
+        {
+            return (_context.SaveChanges() >= 0);
+        }
+
+
     }
 }
