@@ -17,6 +17,8 @@ namespace CityInfo.Services
 
         void AdicionaPontoTuristicoNaCidade(int idCidade, PontoTuristico pontoTuristico);
 
+        void ExcluirPontoTuristicoPorId(int id);
+
         bool Salvar();
         
 

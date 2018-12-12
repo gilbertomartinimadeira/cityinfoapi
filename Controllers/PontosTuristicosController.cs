@@ -153,26 +153,21 @@ namespace CityInfo.Controllers
         {
             if(patchDocument == null){
                 return BadRequest("patchDocument invalido");
-            }
+            }        
 
-            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
-
-            if(cidade == null)
+            if(!_repository.CidadeExiste(idCidade))
             {
                 return NotFound("Cidade não encontrada, verificar o ID");
             }
             
-            var pontoTuristicoArmazenado = cidade.PontosTuristicos.FirstOrDefault(p => p.Id == id);
+            var pontoTuristicoArmazenado = _repository.ObterPontoTuristicoDaCidade(idCidade,id);
 
             if(pontoTuristicoArmazenado == null) 
             {
                 return NotFound();
             }
 
-            var pontoTuristicoParaPatch = new PontoTuristicoParaUpdateDTO(){
-                Nome = pontoTuristicoArmazenado.Nome,
-                Descricao = pontoTuristicoArmazenado.Descricao
-            };
+            var pontoTuristicoParaPatch = AutoMapper.Mapper.Map<PontoTuristicoParaUpdateDTO>(pontoTuristicoArmazenado);                
 
             if(pontoTuristicoParaPatch.Nome == pontoTuristicoParaPatch.Descricao)
             {
@@ -189,8 +184,12 @@ namespace CityInfo.Controllers
                 return BadRequest(ModelState);
             }
 
-            pontoTuristicoArmazenado.Nome = pontoTuristicoParaPatch.Nome;
-            pontoTuristicoArmazenado.Descricao = pontoTuristicoParaPatch.Descricao;
+            AutoMapper.Mapper.Map(pontoTuristicoParaPatch, pontoTuristicoArmazenado );
+
+            if(!_repository.Salvar())
+            {
+                return StatusCode(500, "Erro durante o processamento da requisição");
+            }
 
             return NoContent();
 
@@ -198,23 +197,26 @@ namespace CityInfo.Controllers
 
         [HttpDelete("{id:int}")]
         public IActionResult ExcluirPontoTuristicoPorId(int idCidade, int id)
-        {
+        {        
 
-            var cidade = CidadesDataStore.Cidades.FirstOrDefault(c => c.Id == idCidade);
-
-            if(cidade == null)
+            if(!_repository.CidadeExiste(idCidade))
             {
                 return NotFound("Cidade não encontrada, verificar o ID");
             }
             
-            var pontoTuristicoArmazenado = cidade.PontosTuristicos.FirstOrDefault(p => p.Id == id);
+            var pontoTuristicoArmazenado = _repository.ObterPontoTuristicoDaCidade(idCidade,id);
 
             if(pontoTuristicoArmazenado == null) 
             {
                 return NotFound();
             }
 
-            cidade.PontosTuristicos.Remove(pontoTuristicoArmazenado);
+            _repository.ExcluirPontoTuristicoPorId(id);
+
+            if(!_repository.Salvar())
+            {
+                return StatusCode(500, "Um erro ocorreu durante o processamento da requisição");
+            }
 
             _mailService.Enviar($"Ponto turístico removido", $@"O Ponto turístico  {pontoTuristicoArmazenado.Nome} 
                                                                 com Id {pontoTuristicoArmazenado.Id} foi excluído da base.");

@@ -69,6 +69,14 @@ namespace CityInfo.Services
             return _context.Cidades.Any(c => c.Id == idCidade);
         }
 
+        public void ExcluirPontoTuristicoPorId(int id)
+        {
+            var pontoTuristico = _context.PontosTuristicos.First(p => p.Id == id);
+
+            _context.PontosTuristicos.Remove(pontoTuristico);
+            
+        }
+
         public bool Salvar()
         {
             return (_context.SaveChanges() >= 0);
